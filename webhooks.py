@@ -1116,7 +1116,7 @@ class Webhook(DiscordWebhook):
         """
         errors = response.json()
         wh_sleep = (int(errors['retry_after']) / 1000) + 0.1
-        asyncio.sleep(wh_sleep)
+        await asyncio.sleep(wh_sleep)
         logger.error(
             "Webhook rate limited: sleeping for {wh_sleep} "
             "seconds...".format(
