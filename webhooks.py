@@ -10,6 +10,7 @@ import requests
 import colorsys
 import random
 import re
+import asyncio
 
 if TYPE_CHECKING:
     from typing_extensions import Self
@@ -1115,10 +1116,10 @@ class Webhook(DiscordWebhook):
         """
         errors = response.json()
         wh_sleep = (int(errors['retry_after']) / 1000) + 0.1
+        asyncio.sleep(wh_sleep)
         logger.error(
             "Webhook rate limited: sleeping for {wh_sleep} "
             "seconds...".format(
                 wh_sleep=wh_sleep
             )
         )
-        time.sleep(wh_sleep)
