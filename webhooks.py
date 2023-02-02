@@ -10,7 +10,6 @@ import requests
 import colorsys
 import random
 import re
-import asyncio
 
 if TYPE_CHECKING:
     from typing_extensions import Self
@@ -45,14 +44,14 @@ __all__ = (
     'Webhook',
     'DiscordWebhook',
     'DiscordEmbed',
-    'Colour',
+    'DiscordColor',
     'Color',
 )
 
 RGB_REGEX = re.compile(r'rgb\s*\((?P<r>[0-9.]+%?)\s*,\s*(?P<g>[0-9.]+%?)\s*,\s*(?P<b>[0-9.]+%?)\s*\)')
 
 
-def parse_hex_number(argument: str) -> Colour:
+def parse_hex_number(argument: str) -> DiscordColor:
     arg = ''.join(i * 2 for i in argument) if len(argument) == 3 else argument
     try:
         value = int(arg, base=16)
@@ -77,7 +76,7 @@ def parse_rgb_number(number: str) -> int:
     return value
 
 
-def parse_rgb(argument: str, *, regex: re.Pattern[str] = RGB_REGEX) -> Colour:
+def parse_rgb(argument: str, *, regex: re.Pattern[str] = RGB_REGEX) -> DiscordColor:
     match = regex.match(argument)
     if match is None:
         raise ValueError('invalid rgb syntax found')
@@ -88,7 +87,7 @@ def parse_rgb(argument: str, *, regex: re.Pattern[str] = RGB_REGEX) -> Colour:
     return Color.from_rgb(red, green, blue)
 
 
-class Colour:
+class DiscordColor:
     """Represents a Discord role colour. This class is similar
     to a (red, green, blue) :class:`tuple`.
     There is an alias for this called Color.
@@ -121,7 +120,7 @@ class Colour:
         return (self.value >> (8 * byte)) & 0xFF
 
     def __eq__(self, other: object) -> bool:
-        return isinstance(other, Colour) and self.value == other.value
+        return isinstance(other, DiscordColor) and self.value == other.value
 
     def __ne__(self, other: object) -> bool:
         return not self.__eq__(other)
@@ -133,7 +132,7 @@ class Colour:
         return self.value
 
     def __repr__(self) -> str:
-        return f'<Colour value={self.value}>'
+        return f'<DiscordColor value={self.value}>'
 
     def __hash__(self) -> int:
         return hash(self.value)
@@ -159,18 +158,18 @@ class Colour:
 
     @classmethod
     def from_rgb(cls, r: int, g: int, b: int) -> Self:
-        """Constructs a :class:`Colour` from an RGB tuple."""
+        """Constructs a :class:`DiscordColor` from an RGB tuple."""
         return cls((r << 16) + (g << 8) + b)
 
     @classmethod
     def from_hsv(cls, h: float, s: float, v: float) -> Self:
-        """Constructs a :class:`Colour` from an HSV tuple."""
+        """Constructs a :class:`DiscordColor` from an HSV tuple."""
         rgb = colorsys.hsv_to_rgb(h, s, v)
         return cls.from_rgb(*(int(x * 255) for x in rgb))
 
     @classmethod
     def from_str(cls, value: str) -> Self:
-        """Constructs a :class:`Colour` from a string.
+        """Constructs a :class:`DiscordColor` from a string.
         The following formats are accepted:
         - ``0x<hex>``
         - ``#<hex>``
@@ -202,12 +201,12 @@ class Colour:
 
     @classmethod
     def default(cls) -> Self:
-        """A factory method that returns a :class:`Colour` with a value of ``0``."""
+        """A factory method that returns a :class:`DiscordColor` with a value of ``0``."""
         return cls(0)
 
     @classmethod
     def random(cls, *, seed: Optional[Union[int, str, float, bytes, bytearray]] = None) -> Self:
-        """A factory method that returns a :class:`Colour` with a random hue.
+        """A factory method that returns a :class:`DiscordColor` with a random hue.
         .. note::
             The random algorithm works by choosing a colour with a random hue but
             with maxed out saturation and value.
@@ -222,160 +221,160 @@ class Colour:
 
     @classmethod
     def teal(cls) -> Self:
-        """A factory method that returns a :class:`Colour` with a value of ``0x1abc9c``."""
+        """A factory method that returns a :class:`DiscordColor` with a value of ``0x1abc9c``."""
         return cls(0x1ABC9C)
 
     @classmethod
     def dark_teal(cls) -> Self:
-        """A factory method that returns a :class:`Colour` with a value of ``0x11806a``."""
+        """A factory method that returns a :class:`DiscordColor` with a value of ``0x11806a``."""
         return cls(0x11806A)
 
     @classmethod
     def brand_green(cls) -> Self:
-        """A factory method that returns a :class:`Colour` with a value of ``0x57F287``.
+        """A factory method that returns a :class:`DiscordColor` with a value of ``0x57F287``.
         """
         return cls(0x57F287)
 
     @classmethod
     def green(cls) -> Self:
-        """A factory method that returns a :class:`Colour` with a value of ``0x2ecc71``."""
+        """A factory method that returns a :class:`DiscordColor` with a value of ``0x2ecc71``."""
         return cls(0x2ECC71)
 
     @classmethod
     def dark_green(cls) -> Self:
-        """A factory method that returns a :class:`Colour` with a value of ``0x1f8b4c``."""
+        """A factory method that returns a :class:`DiscordColor` with a value of ``0x1f8b4c``."""
         return cls(0x1F8B4C)
 
     @classmethod
     def blue(cls) -> Self:
-        """A factory method that returns a :class:`Colour` with a value of ``0x3498db``."""
+        """A factory method that returns a :class:`DiscordColor` with a value of ``0x3498db``."""
         return cls(0x3498DB)
 
     @classmethod
     def dark_blue(cls) -> Self:
-        """A factory method that returns a :class:`Colour` with a value of ``0x206694``."""
+        """A factory method that returns a :class:`DiscordColor` with a value of ``0x206694``."""
         return cls(0x206694)
 
     @classmethod
     def purple(cls) -> Self:
-        """A factory method that returns a :class:`Colour` with a value of ``0x9b59b6``."""
+        """A factory method that returns a :class:`DiscordColor` with a value of ``0x9b59b6``."""
         return cls(0x9B59B6)
 
     @classmethod
     def dark_purple(cls) -> Self:
-        """A factory method that returns a :class:`Colour` with a value of ``0x71368a``."""
+        """A factory method that returns a :class:`DiscordColor` with a value of ``0x71368a``."""
         return cls(0x71368A)
 
     @classmethod
     def magenta(cls) -> Self:
-        """A factory method that returns a :class:`Colour` with a value of ``0xe91e63``."""
+        """A factory method that returns a :class:`DiscordColor` with a value of ``0xe91e63``."""
         return cls(0xE91E63)
 
     @classmethod
     def dark_magenta(cls) -> Self:
-        """A factory method that returns a :class:`Colour` with a value of ``0xad1457``."""
+        """A factory method that returns a :class:`DiscordColor` with a value of ``0xad1457``."""
         return cls(0xAD1457)
 
     @classmethod
     def gold(cls) -> Self:
-        """A factory method that returns a :class:`Colour` with a value of ``0xf1c40f``."""
+        """A factory method that returns a :class:`DiscordColor` with a value of ``0xf1c40f``."""
         return cls(0xF1C40F)
 
     @classmethod
     def dark_gold(cls) -> Self:
-        """A factory method that returns a :class:`Colour` with a value of ``0xc27c0e``."""
+        """A factory method that returns a :class:`DiscordColor` with a value of ``0xc27c0e``."""
         return cls(0xC27C0E)
 
     @classmethod
     def orange(cls) -> Self:
-        """A factory method that returns a :class:`Colour` with a value of ``0xe67e22``."""
+        """A factory method that returns a :class:`DiscordColor` with a value of ``0xe67e22``."""
         return cls(0xE67E22)
 
     @classmethod
     def dark_orange(cls) -> Self:
-        """A factory method that returns a :class:`Colour` with a value of ``0xa84300``."""
+        """A factory method that returns a :class:`DiscordColor` with a value of ``0xa84300``."""
         return cls(0xA84300)
 
     @classmethod
     def brand_red(cls) -> Self:
-        """A factory method that returns a :class:`Colour` with a value of ``0xED4245``.
+        """A factory method that returns a :class:`DiscordColor` with a value of ``0xED4245``.
         """
         return cls(0xED4245)
 
     @classmethod
     def red(cls) -> Self:
-        """A factory method that returns a :class:`Colour` with a value of ``0xe74c3c``."""
+        """A factory method that returns a :class:`DiscordColor` with a value of ``0xe74c3c``."""
         return cls(0xE74C3C)
 
     @classmethod
     def dark_red(cls) -> Self:
-        """A factory method that returns a :class:`Colour` with a value of ``0x992d22``."""
+        """A factory method that returns a :class:`DiscordColor` with a value of ``0x992d22``."""
         return cls(0x992D22)
 
     @classmethod
     def lighter_grey(cls) -> Self:
-        """A factory method that returns a :class:`Colour` with a value of ``0x95a5a6``."""
+        """A factory method that returns a :class:`DiscordColor` with a value of ``0x95a5a6``."""
         return cls(0x95A5A6)
 
     lighter_gray = lighter_grey
 
     @classmethod
     def dark_grey(cls) -> Self:
-        """A factory method that returns a :class:`Colour` with a value of ``0x607d8b``."""
+        """A factory method that returns a :class:`DiscordColor` with a value of ``0x607d8b``."""
         return cls(0x607D8B)
 
     dark_gray = dark_grey
 
     @classmethod
     def light_grey(cls) -> Self:
-        """A factory method that returns a :class:`Colour` with a value of ``0x979c9f``."""
+        """A factory method that returns a :class:`DiscordColor` with a value of ``0x979c9f``."""
         return cls(0x979C9F)
 
     light_gray = light_grey
 
     @classmethod
     def darker_grey(cls) -> Self:
-        """A factory method that returns a :class:`Colour` with a value of ``0x546e7a``."""
+        """A factory method that returns a :class:`DiscordColor` with a value of ``0x546e7a``."""
         return cls(0x546E7A)
 
     darker_gray = darker_grey
 
     @classmethod
     def og_blurple(cls) -> Self:
-        """A factory method that returns a :class:`Colour` with a value of ``0x7289da``."""
+        """A factory method that returns a :class:`DiscordColor` with a value of ``0x7289da``."""
         return cls(0x7289DA)
 
     @classmethod
     def blurple(cls) -> Self:
-        """A factory method that returns a :class:`Colour` with a value of ``0x5865F2``."""
+        """A factory method that returns a :class:`DiscordColor` with a value of ``0x5865F2``."""
         return cls(0x5865F2)
 
     @classmethod
     def greyple(cls) -> Self:
-        """A factory method that returns a :class:`Colour` with a value of ``0x99aab5``."""
+        """A factory method that returns a :class:`DiscordColor` with a value of ``0x99aab5``."""
         return cls(0x99AAB5)
 
     @classmethod
     def dark_theme(cls) -> Self:
-        """A factory method that returns a :class:`Colour` with a value of ``0x36393F``.
+        """A factory method that returns a :class:`DiscordColor` with a value of ``0x36393F``.
         This will appear transparent on Discord's dark theme.
         """
         return cls(0x36393F)
 
     @classmethod
     def fuchsia(cls) -> Self:
-        """A factory method that returns a :class:`Colour` with a value of ``0xEB459E``.
+        """A factory method that returns a :class:`DiscordColor` with a value of ``0xEB459E``.
         """
         return cls(0xEB459E)
 
     @classmethod
     def yellow(cls) -> Self:
-        """A factory method that returns a :class:`Colour` with a value of ``0xFEE75C``.
+        """A factory method that returns a :class:`DiscordColor` with a value of ``0xFEE75C``.
         """
         return cls(0xFEE75C)
 
 
-Color = Colour
+Color = DiscordColor
 
 
 class DiscordEmbed:
@@ -466,7 +465,7 @@ class DiscordEmbed:
             timestamp = time.time()
         self.timestamp = str(datetime.datetime.utcfromtimestamp(timestamp))
 
-    def set_color(self, color: Colour) -> None:
+    def set_color(self, color: DiscordColor) -> None:
         """
         set color code of the embed as decimal(int) or hex(string)
 
@@ -1116,10 +1115,10 @@ class Webhook(DiscordWebhook):
         """
         errors = response.json()
         wh_sleep = (int(errors['retry_after']) / 1000) + 0.1
-        await asyncio.sleep(wh_sleep)
         logger.error(
             "Webhook rate limited: sleeping for {wh_sleep} "
             "seconds...".format(
                 wh_sleep=wh_sleep
             )
         )
+        time.sleep(wh_sleep)
